@@ -5,11 +5,15 @@ TB_SRC := tb_counter_4bit.cpp
 
 OBJ_DIR := obj_dir
 
-OBJ := $(OBJ_DIR)/counter_4bit
+OBJ := vtest
 
 MKFILE := V${SRC:.sv=.mk}
 
-$(OBJ): $(OBJ_DIR)
+.PHONY:test
+test: $(OBJ_DIR)/$(OBJ)
+	./$(OBJ_DIR)/$(OBJ)
+
+$(OBJ_DIR)/$(OBJ): $(OBJ_DIR)
 	make -C $(OBJ_DIR) -f $(MKFILE)
 
 $(OBJ_DIR): $(SRC) $(TB_SRC)
