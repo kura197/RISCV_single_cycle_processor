@@ -11,7 +11,14 @@ module datapath #(parameter WIDTH=32, IADDR=10, DADDR=10)
     input logic [WIDTH-1:0] imem_rdata,
     output logic [DADDR-1:0] dmem_addr,
     output logic [WIDTH-1:0] dmem_wdata,
-    input logic [WIDTH-1:0] dmem_rdata
+    input logic [WIDTH-1:0] dmem_rdata,
+    input logic sel_alu0,
+    input logic sel_alu1,
+    input logic [`OP_BIT:0] alu_op,
+    input logic sel_ex,
+    input logic sel_res,
+    input logic sel_rf_wr,
+    input logic sel_pc
 );
 
 localparam RFADDR = 5;
@@ -42,7 +49,6 @@ flopenr #(
     .out(pc)
 );
 
-//TODO: add decoder
 //TODO: add cmp
 
 decoder #(
@@ -76,7 +82,7 @@ regfile #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_alu0 (
-    .sel(),
+    .sel(sel_alu0),
     .in0(rf_rdata1),
     .in1(pc),
     .out(alu_in0)
@@ -85,7 +91,7 @@ mux2 #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_alu1 (
-    .sel(),
+    .sel(sel_alu1),
     .in0(rf_rdata2),
     .in1(imm),
     .out(alu_in1)
@@ -94,6 +100,7 @@ mux2 #(
 alu #(
     .WIDTH(WIDTH)
 ) alu (
+    .op(alu_op),
     .in0(alu_in0),
     .in1(alu_in1),
     .out(alu_out)
@@ -102,7 +109,7 @@ alu #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_ex (
-    .sel(),
+    .sel(sel_ex),
     .in0(alu_out),
     .in1(imm),
     .out(ex_out)
@@ -111,7 +118,7 @@ mux2 #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_res (
-    .sel(),
+    .sel(sel_res),
     .in0(dmem_rdata),
     .in1(ex_out),
     .out(result)
@@ -120,7 +127,7 @@ mux2 #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_rf_wr (
-    .sel(),
+    .sel(sel_rf_wr),
     .in0(result),
     .in1(inc_pc),
     .out(rf_wdata)
@@ -129,7 +136,7 @@ mux2 #(
 mux2 #(
     .WIDTH(WIDTH)
 ) mux2_pc (
-    .sel(),
+    .sel(sel_pc),
     .in0(inc_pc),
     .in1(result),
     .out(next_pc)
