@@ -21,7 +21,7 @@ always_comb
         SLTU: out = {31'd0, in0 < in1};
         XOR: out = in0 ^ in1;
         SRL: out = in0 >> (in1 & 32'b11111);
-        SRA: out = in0 >>> (in1 & 32'b11111);
+        SRA: out = signed'(in0) >>> (in1 & 32'b11111);
         OR: out = in0 | in1;
         AND: out = in0 & in1;
         default: out = 32'dx;

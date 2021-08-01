@@ -29,6 +29,13 @@ unsigned int read_mem(vector<unsigned int>& mem, int addr){
     return ret;
 }
 
+void write_mem(vector<unsigned int>& mem, int addr, int val, int wr_en){
+    for(int i = 0; i < 4; i++){
+        if((wr_en >> i) & 1)
+            mem[addr+i] = (val >> (8*i)) & 0xFF;
+    }
+}
+
 int main(int argc, char **argv) {
     //Verilated::commandArgs(argc, argv);
 
@@ -39,11 +46,13 @@ int main(int argc, char **argv) {
 
     //// initialize memory
     const int IADDR = 20;
-    const int DADDR = 20;
-    vector<unsigned int> dmem(1 << DADDR), imem(1 << IADDR);
+    const int DADDR = IADDR;
+    //// change "unsigned int" to "unsigned char"
+    vector<unsigned int> mem(1 << DADDR);
     unsigned int init_pc;
-    load_elf(argv[1], init_pc, imem, dmem);
+    load_elf(argv[1], init_pc, mem);
     fprintf(stderr, "Initial PC: %d\n", init_pc);
+    //return 0;
 
     Vriscv *dut = new Vriscv();
 
@@ -86,10 +95,9 @@ int main(int argc, char **argv) {
         dut->eval();
         tfp->dump(time_counter);
 
-        dut->dmem_rdata = read_mem(dmem, dut->dmem_addr);
-        dut->imem_rdata = read_mem(imem, dut->imem_addr);
-        if(dut->dmem_wr_en)
-            dmem[dut->dmem_addr] = dut->dmem_wdata;
+        dut->dmem_rdata = read_mem(mem, dut->dmem_addr);
+        dut->imem_rdata = read_mem(mem, dut->imem_addr);
+        write_mem(mem, dut->dmem_addr, dut->dmem_wdata, dut->dmem_wr_en);
 
         if(dut->fin == 1){
             fprintf(stderr, "ECALL is issued.\n");

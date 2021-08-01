@@ -9,7 +9,7 @@ module riscv #(parameter WIDTH=32, IADDR=16, DADDR=16)
     input logic [WIDTH-1:0] imem_rdata,
     output logic [DADDR-1:0] dmem_addr,
     output logic [WIDTH-1:0] dmem_wdata,
-    output logic dmem_wr_en,
+    output logic [3:0] dmem_wr_en,
     input logic [WIDTH-1:0] dmem_rdata,
     output logic fin
 );
@@ -31,6 +31,8 @@ logic sel_pc;
 cmp_type_t cmp_type;
 logic cmp_res;
 
+logic [WIDTH-1:0] dmem_rdata_ex;
+
 datapath #(
     .WIDTH(WIDTH),
     .IADDR(IADDR),
@@ -46,7 +48,7 @@ datapath #(
     .imem_rdata(imem_rdata),
     .dmem_addr(dmem_addr),
     .dmem_wdata(dmem_wdata),
-    .dmem_rdata(dmem_rdata),
+    .dmem_rdata(dmem_rdata_ex),
     .sel_alu0(sel_alu0),
     .sel_alu1(sel_alu1),
     .alu_type(alu_type),
@@ -76,6 +78,15 @@ controller #(
     .sel_pc(sel_pc),
     .cmp_type(cmp_type),
     .fin(fin)
+);
+
+mem_extent #(
+    .WIDTH(WIDTH)
+) mem_extent (
+    .op_type(op_type),
+    .funct3(funct3),
+    .in(dmem_rdata),
+    .out(dmem_rdata_ex)
 );
 
 // add controller

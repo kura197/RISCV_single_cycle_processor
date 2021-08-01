@@ -12,7 +12,7 @@ import lib_pkg::*;
     output logic sel_alu1,
     output alu_type_t alu_type,
     output logic sel_ex,
-    output logic dmem_wr_en,
+    output logic [3:0] dmem_wr_en,
     output logic sel_res,
     output logic sel_rf_wr,
     output logic rf_wr_en,
@@ -28,13 +28,14 @@ assign fin = (op_type == SYSTEM) && ({funct7, funct3} == 10'd0);
 /// typedef enum logic [3:0] {ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND} alu_type_t;
 /// typedef enum logic [3:0] {BEQ, BNE, BLT, BGE, BLTU, BGEU} cmp_type_t;
 assign sel_pc = (op_type == BRANCH) && cmp_res || op_type == JAL || op_type == JALR;
+///TODO: support don't care signal
 always_comb
     case(op_type)
         LUI: begin
-            sel_alu0 = 1'b0;
-            sel_alu1 = 1'b0;
-            sel_ex = 1'b1;
-            dmem_wr_en = 1'b0;
+            sel_alu0 = 1'bx;
+            sel_alu1 = 1'bx;
+            sel_ex = 1'b1;  //imm
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
@@ -46,7 +47,7 @@ always_comb
             sel_alu0 = 1'b1;
             sel_alu1 = 1'b1;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
@@ -58,7 +59,7 @@ always_comb
             sel_alu0 = 1'b1;    //pc
             sel_alu1 = 1'b1;    //imm
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b1;
             rf_wr_en = 1'b1;
@@ -70,7 +71,7 @@ always_comb
             sel_alu0 = 1'b0;    //rs1
             sel_alu1 = 1'b1;    //imm
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b1;
             rf_wr_en = 1'b1;
@@ -82,7 +83,7 @@ always_comb
             sel_alu0 = 1'b1;
             sel_alu1 = 1'b1;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
@@ -103,7 +104,7 @@ always_comb
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b1;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b0;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
@@ -115,19 +116,25 @@ always_comb
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b1;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b1;
             sel_res = 1'b0;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
             //sel_pc = 1'b0;
             alu_type = ADD;
             cmp_type = BEQ;
+            dmem_wr_en = 4'b1111;
+            case(funct3)
+                3'b000: dmem_wr_en = 4'b0001;
+                3'b001: dmem_wr_en = 4'b0011;
+                3'b010: dmem_wr_en = 4'b1111;
+                default: dmem_wr_en = 4'x;
+            endcase
         end
         OPIMM: begin
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b1;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
@@ -153,7 +160,7 @@ always_comb
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b0;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
@@ -184,7 +191,7 @@ always_comb
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b0;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
@@ -196,7 +203,7 @@ always_comb
             sel_alu0 = 1'b0;
             sel_alu1 = 1'b0;
             sel_ex = 1'b0;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'd0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
@@ -208,7 +215,7 @@ always_comb
             sel_alu0 = 1'bx;
             sel_alu1 = 1'bx;
             sel_ex = 1'bx;
-            dmem_wr_en = 1'b0;
+            dmem_wr_en = 4'dx;
             sel_res = 1'bx;
             sel_rf_wr = 1'bx;
             rf_wr_en = 1'b1;
