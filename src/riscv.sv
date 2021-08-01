@@ -1,27 +1,22 @@
 `include "lib_pkg.sv";
 
-module riscv #(parameter WIDTH=32)
+module riscv #(parameter WIDTH=32, IADDR=16, DADDR=16)
 (
     input logic clk,
-    input logic reset_n
+    input logic reset_n,
+    output logic [IADDR-1:0] imem_addr,
+    input logic [WIDTH-1:0] imem_rdata,
+    output logic [DADDR-1:0] dmem_addr,
+    output logic [WIDTH-1:0] dmem_wdata,
+    output logic dmem_wr_en,
+    input logic [WIDTH-1:0] dmem_rdata
 );
 
 import lib_pkg::*;
 
-localparam IADDR = 5;
-localparam DADDR = 5;
-
 op_type_t op_type;
 logic [2:0] funct3;
 logic [6:0] funct7;
-
-logic [IADDR-1:0] imem_addr;
-logic [WIDTH-1:0] imem_rdata;
-
-logic [DADDR-1:0] dmem_addr;
-logic [WIDTH-1:0] dmem_wdata;
-logic dmem_wr_en;
-logic [WIDTH-1:0] dmem_rdata;
 
 logic sel_alu0;
 logic sel_alu1;
@@ -33,28 +28,6 @@ logic rf_wr_en;
 logic sel_pc;
 cmp_type_t cmp_type;
 logic cmp_res;
-
-memory #(
-    .WIDTH(WIDTH),
-    .ADDR(IADDR)
-) imem (
-    .clk(clk),
-    .wr_en(1'b0),
-    .addr(imem_addr),
-    .rdata(imem_rdata),
-    .wdata()
-);
-
-memory #(
-    .WIDTH(WIDTH),
-    .ADDR(DADDR)
-) dmem (
-    .clk(clk),
-    .wr_en(dmem_wr_en),
-    .addr(imem_addr),
-    .rdata(imem_rdata),
-    .wdata(dmem_wdata)
-);
 
 datapath #(
     .WIDTH(WIDTH),
