@@ -34,7 +34,7 @@ int init_memory(unsigned char* buf, Elf32_Shdr *shdr, int e_shnum, std::map<int,
     for (int i = 0; i < e_shnum; i++, shdr++) {
         //std::cout << sh_table[shdr->sh_name] << std::endl;
         std::string& name = sh_table[shdr->sh_name];
-        std::cout << shdr->sh_name << " : " << name << std::endl;
+        //std::cout << shdr->sh_name << " : " << name << std::endl;
         if (name == ".text.init" || name == ".text") {
             init_pc = shdr->sh_offset; 
             for(unsigned int k = 0; k < shdr->sh_size; k++){

@@ -104,7 +104,7 @@ mux2 #(
 alu #(
     .WIDTH(WIDTH)
 ) alu (
-    .op_type(op_type),
+    .alu_type(alu_type),
     .in0(alu_in0),
     .in1(alu_in1),
     .out(alu_out)

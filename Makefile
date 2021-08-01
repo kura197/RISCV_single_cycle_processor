@@ -13,6 +13,8 @@ OBJ := vtest
 MKFILE := V${TOP:.sv=.mk}
 
 CFLAGS := -std=c++14
+#VFLAGS := --trace-fst --trace-params --trace-structs --trace-underscore
+VFLAGS := --trace --trace-params --trace-structs --trace-underscore
 
 # need to set TEST_BIN for simulation
 .PHONY:test
@@ -24,7 +26,7 @@ $(OBJ_DIR)/$(OBJ): $(OBJ_DIR)
 
 $(OBJ_DIR): $(SRC) $(TB_SRC)
 	if [ -d "$(OBJ_DIR)" ]; then rm -r $(OBJ_DIR); fi
-	verilator -cc $(SRC) -CFLAGS $(CFLAGS) -exe $(TB_SRC) -I$(INCLUDE) -o $(OBJ)
+	verilator -cc $(SRC) $(VFLAGS) -CFLAGS $(CFLAGS) -exe $(TB_SRC) -I$(INCLUDE) -o $(OBJ)
 
 .PHONY:clean
 clean:

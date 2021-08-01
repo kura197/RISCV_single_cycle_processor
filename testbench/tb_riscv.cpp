@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <verilated.h>
+#include <verilated_vcd_c.h> 
 #include "read_elf.h"
 #include "Vriscv.h"
 
@@ -18,6 +19,14 @@ void print_rf(Vriscv* dut){
             x[3], x[4], x[5], x[8], \
             x[10], x[11], x[12], x[13], \
             x[14], x[15], x[16], x[17]);
+}
+
+unsigned int read_mem(vector<unsigned int>& mem, int addr){
+    int ret = 0;
+    for(int i = 0; i < 4; i++){
+        ret |= mem[addr+i] << (8*i);
+    }
+    return ret;
 }
 
 int main(int argc, char **argv) {
@@ -38,39 +47,50 @@ int main(int argc, char **argv) {
 
     Vriscv *dut = new Vriscv();
 
+    Verilated::traceEverOn(true);
+    VerilatedVcdC *tfp = new VerilatedVcdC;
+    dut->trace(tfp, 100); // Trace 100 levels of hierarchy
+    tfp->open("wave.vcd");
+
     //// toggle reset_n
     dut->reset_n = 1;
     dut->clk = 0;
-    dut->init_pc = init_pc;
+    dut->init_pc = init_pc - 4;
     int time_counter = 0;
     while(time_counter < 100){
-        if(time_counter % 5 == 0)
+        if(time_counter % 5 == 0){
             dut->clk = !dut->clk;
 
-        if(time_counter == 20)
-            dut->reset_n = 0;
-
+            if(time_counter == 20)
+                dut->reset_n = 0;
+        }
         dut->eval();
+        tfp->dump(time_counter);
         time_counter++;
     }
 
     //// start simulation
     dut->reset_n = 1;
     int cycle = 0;
-    while(time_counter < 500){
-        if(time_counter % 5 == 0)
+    while(time_counter < 6000 && !Verilated::gotFinish()){
+        if(time_counter % 5 == 0){
             dut->clk = !dut->clk;
-        if(time_counter % 10 == 0)
-            cycle++;
 
-        if(dut->dmem_wr_en)
-            dmem[dut->dmem_addr] = dut->dmem_wdata;
-        dut->dmem_rdata = dmem[dut->dmem_addr];
-        dut->imem_rdata = imem[dut->imem_addr];
+            if(time_counter % 10 == 0)
+                cycle++;
+
+            if(time_counter % 10 == 0)
+                print_rf(dut);
+        }
 
         dut->eval();
-        if(time_counter % 10 == 0)
-            print_rf(dut);
+        tfp->dump(time_counter);
+
+        dut->dmem_rdata = read_mem(dmem, dut->dmem_addr);
+        dut->imem_rdata = read_mem(imem, dut->imem_addr);
+        if(dut->dmem_wr_en)
+            dmem[dut->dmem_addr] = dut->dmem_wdata;
+
         time_counter++;
     }
 
@@ -79,4 +99,6 @@ int main(int argc, char **argv) {
 
     dut->final();
     delete dut;
+    tfp->close();
+    delete tfp;
 }

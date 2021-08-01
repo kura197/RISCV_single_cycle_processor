@@ -22,7 +22,6 @@ assign rs1 = instr[19:15];
 assign rs2 = instr[24:20];
 assign funct7 = instr[31:25];
 
-logic test;
 always_comb
     case(opcode)
         7'b0110111: begin
@@ -35,7 +34,7 @@ always_comb
         end
         7'b1101111: begin
             op_type = JAL;
-            imm = {instr[20], instr[10:1], instr[11], instr[19:12], 12'b0};
+            imm = {{11{instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
         end
         7'b1100111: begin
             op_type = JALR;

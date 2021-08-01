@@ -22,6 +22,8 @@ import lib_pkg::*;
 
 /// typedef enum [`INSTR_BIT-1:0] {LUI, AUIPC, JAL, JALR, BRANCH, LOAD, STORE, OPIMM, OP, MISCMEM, SYSTEM} instr_kind;
 /// typedef enum logic [3:0] {ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND} alu_type_t;
+/// typedef enum logic [3:0] {BEQ, BNE, BLT, BGE, BLTU, BGEU} cmp_type_t;
+assign sel_pc = (op_type == BRANCH) && cmp_res || op_type == JAL || op_type == JALR;
 always_comb
     case(op_type)
         LUI: begin
@@ -32,8 +34,9 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         AUIPC: begin
             sel_alu0 = 1'b1;
@@ -43,30 +46,33 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         JAL: begin
-            sel_alu0 = 1'b0;
-            sel_alu1 = 1'b0;
-            sel_ex = 1'b1;
-            dmem_wr_en = 1'b0;
-            sel_res = 1'b1;
-            sel_rf_wr = 1'b1;
-            rf_wr_en = 1'b1;
-            sel_pc = 1'b1;
-            alu_type = ADD;
-        end
-        JALR: begin
-            sel_alu0 = 1'b0;
-            sel_alu1 = 1'b1;
+            sel_alu0 = 1'b1;    //pc
+            sel_alu1 = 1'b1;    //imm
             sel_ex = 1'b0;
             dmem_wr_en = 1'b0;
             sel_res = 1'b1;
             sel_rf_wr = 1'b1;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b1;
+            //sel_pc = 1'b1;
             alu_type = ADD;
+            cmp_type = BEQ;
+        end
+        JALR: begin
+            sel_alu0 = 1'b0;    //rs1
+            sel_alu1 = 1'b1;    //imm
+            sel_ex = 1'b0;
+            dmem_wr_en = 1'b0;
+            sel_res = 1'b1;
+            sel_rf_wr = 1'b1;
+            rf_wr_en = 1'b1;
+            //sel_pc = 1'b1;
+            alu_type = ADD;
+            cmp_type = BEQ;
         end
         BRANCH: begin
             sel_alu0 = 1'b1;
@@ -76,8 +82,18 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
-            sel_pc = cmp_res;
+            //sel_pc = cmp_res;
             alu_type = ADD;
+            cmp_type = BEQ;
+            case(funct3)
+                3'b000: cmp_type = BEQ;
+                3'b001: cmp_type = BNE;
+                3'b100: cmp_type = BLT;
+                3'b101: cmp_type = BGE;
+                3'b110: cmp_type = BLTU;
+                3'b111: cmp_type = BGEU;
+                default: cmp_type = 'x;
+            endcase
         end
         LOAD: begin
             sel_alu0 = 1'b0;
@@ -87,8 +103,9 @@ always_comb
             sel_res = 1'b0;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         STORE: begin
             sel_alu0 = 1'b0;
@@ -98,8 +115,9 @@ always_comb
             sel_res = 1'b0;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         OPIMM: begin
             sel_alu0 = 1'b0;
@@ -109,7 +127,8 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
+            cmp_type = BEQ;
             case(funct3)
                 3'b000: alu_type = ADD;
                 3'b010: alu_type = SLT;
@@ -134,8 +153,9 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b1;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
             case(funct3)
                 3'b000: begin
                     if (funct7 == 7'b0000000) alu_type = ADD;
@@ -164,8 +184,9 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         SYSTEM: begin
             sel_alu0 = 1'b0;
@@ -175,8 +196,9 @@ always_comb
             sel_res = 1'b1;
             sel_rf_wr = 1'b0;
             rf_wr_en = 1'b0;
-            sel_pc = 1'b0;
+            //sel_pc = 1'b0;
             alu_type = ADD;
+            cmp_type = BEQ;
         end
         default: begin
             sel_alu0 = 1'bx;
@@ -186,8 +208,9 @@ always_comb
             sel_res = 1'bx;
             sel_rf_wr = 1'bx;
             rf_wr_en = 1'b1;
-            sel_pc = 1'bx;
-            alu_type = ADD;
+            //sel_pc = 1'bx;
+            alu_type = 'x;
+            cmp_type = 'x;
         end
     endcase
     
