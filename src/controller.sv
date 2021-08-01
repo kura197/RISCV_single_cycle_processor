@@ -17,8 +17,12 @@ import lib_pkg::*;
     output logic sel_rf_wr,
     output logic rf_wr_en,
     output logic sel_pc,
-    output cmp_type_t cmp_type
+    output cmp_type_t cmp_type,
+    output logic fin
 );
+
+/// for debug
+assign fin = (op_type == SYSTEM) && ({funct7, funct3} == 10'd0);
 
 /// typedef enum [`INSTR_BIT-1:0] {LUI, AUIPC, JAL, JALR, BRANCH, LOAD, STORE, OPIMM, OP, MISCMEM, SYSTEM} instr_kind;
 /// typedef enum logic [3:0] {ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND} alu_type_t;

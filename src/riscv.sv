@@ -10,7 +10,8 @@ module riscv #(parameter WIDTH=32, IADDR=16, DADDR=16)
     output logic [DADDR-1:0] dmem_addr,
     output logic [WIDTH-1:0] dmem_wdata,
     output logic dmem_wr_en,
-    input logic [WIDTH-1:0] dmem_rdata
+    input logic [WIDTH-1:0] dmem_rdata,
+    output logic fin
 );
 
 import lib_pkg::*;
@@ -73,7 +74,8 @@ controller #(
     .sel_rf_wr(sel_rf_wr),
     .rf_wr_en(rf_wr_en),
     .sel_pc(sel_pc),
-    .cmp_type(cmp_type)
+    .cmp_type(cmp_type),
+    .fin(fin)
 );
 
 // add controller

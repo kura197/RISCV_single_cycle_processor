@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     vector<unsigned int> dmem(1 << DADDR), imem(1 << IADDR);
     unsigned int init_pc;
     load_elf(argv[1], init_pc, imem, dmem);
-    printf("Initial PC: %d\n", init_pc);
+    fprintf(stderr, "Initial PC: %d\n", init_pc);
 
     Vriscv *dut = new Vriscv();
 
@@ -91,10 +91,16 @@ int main(int argc, char **argv) {
         if(dut->dmem_wr_en)
             dmem[dut->dmem_addr] = dut->dmem_wdata;
 
+        if(dut->fin == 1){
+            fprintf(stderr, "ECALL is issued.\n");
+            printf("a0 : %08x\n", dut->v__DOT__datapath__DOT__regfile__DOT__data[10]);
+            break;
+        }
+
         time_counter++;
     }
 
-    printf("Final cycle count = %d\n", cycle);
+    fprintf(stderr, "Final cycle count = %d\n", cycle);
     print_rf(dut);
 
     dut->final();
