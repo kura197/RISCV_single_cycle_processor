@@ -6,6 +6,7 @@ import lib_pkg::*;
 (
     input logic clk,
     input logic reset_n,
+    input logic [WIDTH-1:0] init_pc,
     output op_type_t op_type,
     output logic [2:0] funct3,
     output logic [6:0] funct7,
@@ -48,6 +49,7 @@ flopenr #(
 ) reg_pc (
     .clk(clk),
     .reset_n(reset_n),
+    .init(init_pc),
     .wr_en(1'b1),
     .in(next_pc),
     .out(pc)

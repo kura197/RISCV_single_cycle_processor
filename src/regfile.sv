@@ -18,9 +18,11 @@ assign rdata1 = (rs1 == 0) ? 32'd0 : data[rs1];
 assign rdata2 = (rs2 == 0) ? 32'd0 : data[rs2];
 
 always_ff @(posedge clk) 
-    if(!reset_n)
+    if(!reset_n) begin
         for(int i = 0; i < nENTRY; i++)
             data[i] <= 0;
+        data[2] <= 32'h1000;
+    end
     else if(wr_en)
         data[rd] <= wdata;
 

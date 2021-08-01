@@ -14,6 +14,7 @@ logic [DADDR-1:0] dmem_addr;
 logic [WIDTH-1:0] dmem_wdata;
 logic dmem_wr_en;
 logic [WIDTH-1:0] dmem_rdata;
+logic [WIDTH-1:0] init_pc = 0;
 
 riscv #(
     .WIDTH(WIDTH),
@@ -22,6 +23,7 @@ riscv #(
 ) riscv (
     .clk(clk),
     .reset_n(reset_n),
+    .init_pc(init_pc),
     .imem_addr(imem_addr),
     .imem_rdata(imem_rdata),
     .dmem_addr(dmem_addr),

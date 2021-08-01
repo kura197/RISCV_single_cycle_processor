@@ -4,6 +4,7 @@ module riscv #(parameter WIDTH=32, IADDR=16, DADDR=16)
 (
     input logic clk,
     input logic reset_n,
+    input logic [WIDTH-1:0] init_pc,
     output logic [IADDR-1:0] imem_addr,
     input logic [WIDTH-1:0] imem_rdata,
     output logic [DADDR-1:0] dmem_addr,
@@ -36,6 +37,7 @@ datapath #(
 ) datapath (
     .clk(clk),
     .reset_n(reset_n),
+    .init_pc(init_pc),
     .op_type(op_type),
     .funct3(funct3),
     .funct7(funct7),
