@@ -14,8 +14,8 @@ module regfile #(parameter WIDTH=32, ADDR=5)
 localparam nENTRY = 2**ADDR;
 logic [WIDTH-1:0] data [nENTRY];
 
-assign rdata1 = data[rs1];
-assign rdata2 = data[rs2];
+assign rdata1 = (rs1 == 0) ? 32'd0 : data[rs1];
+assign rdata2 = (rs2 == 0) ? 32'd0 : data[rs2];
 
 always_ff @(posedge clk) 
     if(!reset_n)

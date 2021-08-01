@@ -1,10 +1,12 @@
-`include "def.h";
+`include "lib_pkg.sv";
 
-module datapath #(parameter WIDTH=32, IADDR=10, DADDR=10)
+module datapath 
+import lib_pkg::*;
+#(parameter WIDTH=32, IADDR=10, DADDR=10)
 (
     input logic clk,
     input logic reset_n,
-    output logic [`INSTR_BIT-1:0] kind,
+    output op_type_t op_type,
     output logic [2:0] funct3,
     output logic [6:0] funct7,
     output logic [IADDR-1:0] imem_addr,
@@ -14,11 +16,14 @@ module datapath #(parameter WIDTH=32, IADDR=10, DADDR=10)
     input logic [WIDTH-1:0] dmem_rdata,
     input logic sel_alu0,
     input logic sel_alu1,
-    input logic [`OP_BIT:0] alu_op,
+    input alu_type_t alu_type,
     input logic sel_ex,
     input logic sel_res,
     input logic sel_rf_wr,
-    input logic sel_pc
+    input logic rf_wr_en,
+    input logic sel_pc,
+    input cmp_type_t cmp_type,
+    output logic cmp_out
 );
 
 localparam RFADDR = 5;
@@ -26,7 +31,6 @@ localparam RFADDR = 5;
 logic [WIDTH-1:0] pc, next_pc, inc_pc;
 logic [WIDTH-1:0] instr;
 logic [WIDTH-1:0] imm;
-logic rf_wr_en;
 logic [RFADDR-1:0] rs1, rs2, rd;
 logic [WIDTH-1:0] rf_rdata1, rf_rdata2, rf_wdata;
 logic [WIDTH-1:0] alu_in0, alu_in1, alu_out;
@@ -49,13 +53,11 @@ flopenr #(
     .out(pc)
 );
 
-//TODO: add cmp
-
 decoder #(
     .WIDTH(WIDTH)
 ) decoder (
     .instr(instr),
-    .kind(kind),
+    .op_type(op_type),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd),
@@ -100,10 +102,19 @@ mux2 #(
 alu #(
     .WIDTH(WIDTH)
 ) alu (
-    .op(alu_op),
+    .op_type(op_type),
     .in0(alu_in0),
     .in1(alu_in1),
     .out(alu_out)
+);
+
+cmp #(
+    .WIDTH(WIDTH)
+) cmp (
+    .cmp_type(cmp_type),
+    .in0(rf_rdata1),
+    .in1(rf_rdata2),
+    .out(cmp_out)
 );
 
 mux2 #(

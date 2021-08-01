@@ -1,4 +1,4 @@
-`include "def.h";
+`include "lib_pkg.sv";
 
 module riscv #(parameter WIDTH=32)
 (
@@ -6,10 +6,12 @@ module riscv #(parameter WIDTH=32)
     input logic reset_n
 );
 
+import lib_pkg::*;
+
 localparam IADDR = 5;
 localparam DADDR = 5;
 
-logic [`INSTR_BIT-1:0] kind;
+op_type_t op_type;
 logic [2:0] funct3;
 logic [6:0] funct7;
 
@@ -23,11 +25,14 @@ logic [WIDTH-1:0] dmem_rdata;
 
 logic sel_alu0;
 logic sel_alu1;
-logic [`OP_BIT:0] alu_op;
+alu_type_t alu_type;
 logic sel_ex;
 logic sel_res;
 logic sel_rf_wr;
+logic rf_wr_en;
 logic sel_pc;
+cmp_type_t cmp_type;
+logic cmp_res;
 
 memory #(
     .WIDTH(WIDTH),
@@ -58,7 +63,7 @@ datapath #(
 ) datapath (
     .clk(clk),
     .reset_n(reset_n),
-    .kind(kind),
+    .op_type(op_type),
     .funct3(funct3),
     .funct7(funct7),
     .imem_addr(imem_addr),
@@ -66,13 +71,34 @@ datapath #(
     .dmem_addr(dmem_addr),
     .dmem_wdata(dmem_wdata),
     .dmem_rdata(dmem_rdata),
-    .sel_alu0(),
-    .sel_alu1(),
-    .alu_op(),
-    .sel_ex(),
-    .sel_res(),
-    .sel_rf_wr(),
-    .sel_pc()
+    .sel_alu0(sel_alu0),
+    .sel_alu1(sel_alu1),
+    .alu_type(alu_type),
+    .sel_ex(sel_ex),
+    .sel_res(sel_res),
+    .sel_rf_wr(sel_rf_wr),
+    .rf_wr_en(rf_wr_en),
+    .sel_pc(sel_pc),
+    .cmp_type(cmp_type),
+    .cmp_out(cmp_res)
+);
+
+controller #(
+) controller (
+    .op_type(op_type),
+    .funct3(funct3),
+    .funct7(funct7),
+    .cmp_res(cmp_res),
+    .sel_alu0(sel_alu0),
+    .sel_alu1(sel_alu1),
+    .alu_type(alu_type),
+    .sel_ex(sel_ex),
+    .dmem_wr_en(dmem_wr_en),
+    .sel_res(sel_res),
+    .sel_rf_wr(sel_rf_wr),
+    .rf_wr_en(rf_wr_en),
+    .sel_pc(sel_pc),
+    .cmp_type(cmp_type)
 );
 
 // add controller
