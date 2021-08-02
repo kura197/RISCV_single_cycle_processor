@@ -21,15 +21,15 @@ void print_rf(Vriscv* dut){
             x[14], x[15], x[16], x[17]);
 }
 
-unsigned int read_mem(vector<unsigned int>& mem, int addr){
+unsigned int read_mem(vector<unsigned char>& mem, int addr){
     int ret = 0;
     for(int i = 0; i < 4; i++){
-        ret |= mem[addr+i] << (8*i);
+        ret |= static_cast<unsigned int>(mem[addr+i]) << (8*i);
     }
     return ret;
 }
 
-void write_mem(vector<unsigned int>& mem, int addr, int val, int wr_en){
+void write_mem(vector<unsigned char>& mem, int addr, unsigned int val, int wr_en){
     for(int i = 0; i < 4; i++){
         if((wr_en >> i) & 1)
             mem[addr+i] = (val >> (8*i)) & 0xFF;
@@ -37,7 +37,7 @@ void write_mem(vector<unsigned int>& mem, int addr, int val, int wr_en){
 }
 
 int main(int argc, char **argv) {
-    //Verilated::commandArgs(argc, argv);
+    Verilated::commandArgs(argc, argv);
 
     if(argc != 2){
         fprintf(stderr, "Usage: %s binary\n", argv[0]);
@@ -47,12 +47,10 @@ int main(int argc, char **argv) {
     //// initialize memory
     const int IADDR = 20;
     const int DADDR = IADDR;
-    //// change "unsigned int" to "unsigned char"
-    vector<unsigned int> mem(1 << DADDR);
+    vector<unsigned char> mem(1 << DADDR);
     unsigned int init_pc;
     load_elf(argv[1], init_pc, mem);
     fprintf(stderr, "Initial PC: %d\n", init_pc);
-    //return 0;
 
     Vriscv *dut = new Vriscv();
 

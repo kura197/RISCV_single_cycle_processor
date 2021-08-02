@@ -3,6 +3,6 @@
 
 #include <vector>
 
-int load_elf(const char* filename, unsigned int& init_pc, std::vector<unsigned int>& mem);
+int load_elf(const char* filename, unsigned int& init_pc, std::vector<unsigned char>& mem);
 
 #endif
