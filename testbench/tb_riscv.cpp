@@ -85,11 +85,11 @@ int main(int argc, char **argv) {
         if(time_counter % 5 == 0){
             dut->clk = !dut->clk;
 
-            if(time_counter % 10 == 0)
+            if(time_counter % 10 == 0){
                 cycle++;
-
-            if(time_counter % 10 == 0)
                 print_rf(dut);
+            }
+
         }
 
         dut->eval();
@@ -97,7 +97,11 @@ int main(int argc, char **argv) {
 
         dut->dmem_rdata = read_mem(mem, dut->dmem_addr);
         dut->imem_rdata = read_mem(mem, dut->imem_addr);
-        write_mem(mem, dut->dmem_addr, dut->dmem_wdata, dut->dmem_wr_en);
+        if(time_counter % 5 == 0){
+            if(dut->clk == 0){
+                write_mem(mem, dut->dmem_addr, dut->dmem_wdata, dut->dmem_wr_en);
+            }
+        }
 
         if(dut->fin == 1){
             fprintf(stderr, "ECALL is issued.\n");
